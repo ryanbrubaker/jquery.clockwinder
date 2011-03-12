@@ -14,6 +14,8 @@
     }, options.interval);
   
     $.clockwinder.update(elements, options);
+
+    return this;
   }
 
   $.clockwinder = {
