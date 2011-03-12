@@ -21,7 +21,7 @@
   $.clockwinder = {
     update:function(elements, options) {
       elements.each(function() {
-        var newTime = $.clockwinder.compute($(this).attr(options.attr));
+        var newTime = $.clockwinder.compute($(this).attr(options.attr), options);
         
         if (options.displayFunction) {
           options.displayFunction.call(this, newTime, options);
@@ -34,22 +34,41 @@
     },
   
     compute:function(timeStr, opts) {
-       var options = opts || {}
-       var then = Date.parse(timeStr);
-       var today = new Date();
-    
-       distance_in_milliseconds = today - then;
-       distance_in_minutes = Math.round(Math.abs(distance_in_milliseconds / 60000));
+      var options = opts || {};
+      var then = Date.parse(timeStr);
+      var today = new Date();
 
-       if (distance_in_minutes < 1440 || options.alwaysRelative){
-        return $.clockwinder.time_ago_in_words(then) + (options.postfix ? ' ' + options.postfix : '');
-       } else if (distance_in_minutes > 1440 && distance_in_minutes < 2160) {
-        return then.strftime("Yesterday at %l:%M %p");
-       } else {
-        return then.strftime("%m/%d/%Y at %l:%M %p");
-       }
+      distance_in_milliseconds = today - then;
+      distance_in_minutes = Math.round(Math.abs(distance_in_milliseconds / 60000));
 
-       return formatted_time;
+      if (distance_in_minutes < 1440 || options.alwaysRelative){
+       return $.clockwinder.time_ago_in_words(then) + (options.postfix ? ' ' + options.postfix : '');
+      }
+
+      then = new Date(then);
+
+      var hour = parseInt(then.getHours());
+      var minutes = then.getMinutes() + '';
+      var ampm = hour < 12 ? 'am' : 'pm';
+
+      if (hour > 12) { hour = hour - 12; }
+      if (hour == 0) { hour = 12; }
+
+      if (minutes.length == 1) { minutes = '0' + minutes; }
+
+      var time = hour + ':' + minutes + ' ' + ampm;
+
+      if (distance_in_minutes > 1440 && distance_in_minutes < 2160) {
+        return 'yesterday at ' + time;
+      }
+
+      var year = then.getFullYear().substr(2);
+      var month = then.getMonth() + 1;
+      var day = then.getDate() + '';
+
+      if (day.length == 1) { day = '0' + day };
+
+      return [month, day, year].join('/') + ' at ' + time;
     },
   
     time_ago_in_words:function(from) {
@@ -57,22 +76,22 @@
     },
 
     distance_of_time_in_words:function(to, from) {
-      seconds_ago = ((to  - from) / 1000);
+      seconds_ago = Math.floor((to  - from) / 1000);
       minutes_ago = Math.floor(seconds_ago / 60)
 
-      if(minutes_ago == 0) { return "less than a minute";}
-      if(minutes_ago == 1) { return "a minute";}
-      if(minutes_ago < 45) { return minutes_ago + " minutes";}
-      if(minutes_ago < 90) { return " about 1 hour";}
+      if(minutes_ago == 0) { return "about " + seconds_ago + " seconds";}
+      if(minutes_ago == 1) { return "about a minute";}
+      if(minutes_ago < 45) { return "about " + minutes_ago + " minutes";}
+      if(minutes_ago < 90) { return "about an hour";}
       hours_ago  = Math.round(minutes_ago / 60);
       if(minutes_ago < 1440) { return "about " + hours_ago + " hours";}
-      if(minutes_ago < 2880) { return "1 day";}
+      if(minutes_ago < 2880) { return "about a day";}
       days_ago  = Math.round(minutes_ago / 1440);
-      if(minutes_ago < 43200) { return days_ago + " days";}
-      if(minutes_ago < 86400) { return "about 1 month";}
+      if(minutes_ago < 43200) { return "about " + days_ago + " days";}
+      if(minutes_ago < 86400) { return "about a month";}
       months_ago  = Math.round(minutes_ago / 43200);
-      if(minutes_ago < 525960) { return months_ago + " months";}
-      if(minutes_ago < 1051920) { return "about 1 year";}
+      if(minutes_ago < 525960) { return "about " + months_ago + " months";}
+      if(minutes_ago < 1051920) { return "about a year";}
       years_ago  = Math.round(minutes_ago / 525960);
       return "over " + years_ago + " years" 
     }
