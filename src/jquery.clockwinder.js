@@ -19,8 +19,7 @@
   $.clockwinder = {
     update:function(elements, options) {
       elements.each(function() {
-        var curTime = options.attr ? $(this).attr(options.attr) : $(this).text();
-        var newTime = $.clockwinder.compute(curTime, options);
+        var newTime = $.clockwinder.compute($(this).attr(options.attr), options);
         
         if (options.displayFunction) {
           options.displayFunction.call(this, newTime, options);
