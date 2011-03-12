@@ -19,12 +19,12 @@
   $.clockwinder = {
     update:function(elements, options) {
       elements.each(function() {
-        var newTime = $.clockwinder.compute($(this).attr(options.attr);
+        var newTime = $.clockwinder.compute($(this).attr(options.attr));
         
         if (options.displayFunction) {
           options.displayFunction.call(this, newTime, options);
         } else {
-          $(this).text(newTime, options));
+          $(this).text(newTime, options);
         }
         
         $(this).trigger('clockwinder.updated');
