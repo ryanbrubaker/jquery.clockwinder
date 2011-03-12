@@ -19,7 +19,8 @@
   $.clockwinder = {
     update:function(elements, options) {
       elements.each(function() {
-        var newTime = $.clockwinder.compute($(this).attr(options.attr);
+        var curTime = options.attr ? $(this).attr(options.attr) : $(this).text();
+        var newTime = $.clockwinder.compute(curTime, options);
         
         if (options.displayFunction) {
           options.displayFunction.call(this, newTime, options);
@@ -32,22 +33,41 @@
     },
   
     compute:function(timeStr, opts) {
-       var options = opts || {}
-       var then = Date.parse(timeStr);
-       var today = new Date();
-    
-       distance_in_milliseconds = today - then;
-       distance_in_minutes = Math.round(Math.abs(distance_in_milliseconds / 60000));
+      var options = opts || {};
+      var then = Date.parse(timeStr);
+      var today = new Date();
 
-       if (distance_in_minutes < 1440 || options.alwaysRelative){
-        return $.clockwinder.time_ago_in_words(then) + (options.postfix ? ' ' + options.postfix : '');
-       } else if (distance_in_minutes > 1440 && distance_in_minutes < 2160) {
-        return then.strftime("Yesterday at %l:%M %p");
-       } else {
-        return then.strftime("%m/%d/%Y at %l:%M %p");
-       }
+      distance_in_milliseconds = today - then;
+      distance_in_minutes = Math.round(Math.abs(distance_in_milliseconds / 60000));
 
-       return formatted_time;
+      if (distance_in_minutes < 1440 || options.alwaysRelative){
+       return $.clockwinder.time_ago_in_words(then) + (options.postfix ? ' ' + options.postfix : '');
+      }
+
+      then = new Date(then);
+
+      var hour = parseInt(then.getHours());
+      var minutes = then.getMinutes() + '';
+      var ampm = hour < 12 ? 'am' : 'pm';
+
+      if (hour > 12) { hour = hour - 12; }
+      if (hour == 0) { hour = 12; }
+
+      if (minutes.length == 1) { minutes = '0' + minutes; }
+
+      var time = hour + ':' + minutes + ' ' + ampm;
+
+      if (distance_in_minutes > 1440 && distance_in_minutes < 2160) {
+        return 'yesterday at ' + time;
+      }
+
+      var year = then.getFullYear().substr(2);
+      var month = then.getMonth() + 1;
+      var day = then.getDate() + '';
+
+      if (day.length == 1) { day = '0' + day };
+
+      return [month, day, year].join('/') + ' at ' + time;
     },
   
     time_ago_in_words:function(from) {
