@@ -62,7 +62,7 @@
         return 'yesterday at ' + time;
       }
 
-      var year = then.getFullYear().substr(2);
+      var year = ('' + then.getFullYear()).substr(2);
       var month = then.getMonth() + 1;
       var day = then.getDate() + '';
 
